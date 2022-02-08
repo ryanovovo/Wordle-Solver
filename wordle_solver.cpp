@@ -58,7 +58,7 @@ vector<vector<int>> all_words_dist(vector<string> &words){
 	int n = words.size();
 	vector<vector<int>> res(n, vector<int>(242, 0));
 	for(int i = 0; i < n; i++){
-		if(i % 50 == 0){
+		if(i % 100 == 0){
 			cout << (double)i /  (double)n * 100 << '%' << endl;
 		}
 		for(int j = 0; j < n; j++){
@@ -72,6 +72,76 @@ vector<vector<int>> all_words_dist(vector<string> &words){
 int guess(vector<string> &allPossibleWords){
 	auto words_dist = all_words_dist(allPossibleWords);
   	double min_stdev = 99999.0;
+  	int guess_idx = 0;
+  	for(int i = 0; i < allPossibleWords.size(); i++){
+  		double stdev = standard_deviation(words_dist[i]);
+  		if(stdev < min_stdev){
+  			min_stdev = stdev;
+  			guess_idx = i;
+  		}
+  	}
+  	vector<string> tmp;
+  	string raw_result;
+  	cout << "best guess :" << allPossibleWords[guess_idx] << endl;
+  	cout << "input result" << endl;
+  	cin >> raw_result;
+  	int result = 0;
+  	int pow = 1;
+  	for(int i = 0; i < 5; i++){
+  		if(raw_result[i] == 'o'){
+  			result += pow*2;
+  		}
+  		else if(raw_result[i] == '_'){
+  			result += pow;
+  		}
+  		pow *=3;
+  	}
+  	for(auto word : allPossibleWords){
+  		if(compare_two_strings(word, allPossibleWords[guess_idx]) == result){
+  			tmp.push_back(word);
+  		}
+  	}
+  	allPossibleWords.clear();
+  	allPossibleWords = tmp;
+  	if(result == 242){
+  		cout << "Congratulations!" << endl;
+  		return 0;
+  	}
+  	return 1;
+}
+
+
+int init(vector<string> &allPossibleWords){
+	vector<vector<int>> words_dist(allPossibleWords.size(), vector<int>(242));
+	ifstream dists;
+	dists.open("/Users/ryanovovo/Documents/wordle-solver/all_words_dist.txt");
+	if(dists.is_open()){
+		/*
+		for(int i = 0; i < words_dist.size(); i++){
+			for(int j = 0; j < words_dist[i].size(); j++){
+				dists << words_dist[i][j] << ' ';
+			}
+			dists << "\n";
+		}
+		*/
+		string line;
+		for(int i = 0; getline(dists, line); i++){
+			string tmp;
+			int it = 0;
+			for(auto ch : line){
+				if(ch == ' '){
+					words_dist[i][it] = stoi(tmp);
+					it++;
+					tmp.clear();
+				}
+				else{
+					tmp.push_back(ch);
+				}
+			}
+		}
+	}
+	dists.close();
+	double min_stdev = 99999.0;
   	int guess_idx = 0;
   	for(int i = 0; i < allPossibleWords.size(); i++){
   		double stdev = standard_deviation(words_dist[i]);
@@ -125,6 +195,7 @@ int main () {
   		cout << "Unable to open words!" << endl;
   	}
   	cout << "start" << endl;
+  	init(allPossibleWords);
   	while(guess(allPossibleWords));
   	
 }
