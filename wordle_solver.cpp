@@ -59,7 +59,7 @@ vector<vector<int>> all_words_dist(vector<string> &words){
 	vector<vector<int>> res(n, vector<int>(242, 0));
 	for(int i = 0; i < n; i++){
 		if(i % 100 == 0){
-			cout << (double)i /  (double)n * 100 << '%' << endl;
+			// cout << (double)i /  (double)n * 100 << '%' << endl;
 		}
 		for(int j = 0; j < n; j++){
 			int diff = compare_two_strings(words[i], words[j]);
@@ -69,7 +69,7 @@ vector<vector<int>> all_words_dist(vector<string> &words){
 	return res;
 }
 
-int guess(vector<string> &allPossibleWords){
+string guess(vector<string> &allPossibleWords, int result){
 	auto words_dist = all_words_dist(allPossibleWords);
   	double min_stdev = 99999.0;
   	int guess_idx = 0;
@@ -82,11 +82,12 @@ int guess(vector<string> &allPossibleWords){
   	}
   	vector<string> tmp;
   	string raw_result;
-  	cout << "best guess :" << allPossibleWords[guess_idx] << endl;
-  	cout << "input result" << endl;
-  	cin >> raw_result;
-  	int result = 0;
+  	// cout << "best guess :" << allPossibleWords[guess_idx] << endl;
+  	// cout << "input result" << endl;
+  	// cin >> raw_result;
+  	// int result = 0;
   	int pow = 1;
+  	/*
   	for(int i = 0; i < 5; i++){
   		if(raw_result[i] == 'o'){
   			result += pow*2;
@@ -96,6 +97,7 @@ int guess(vector<string> &allPossibleWords){
   		}
   		pow *=3;
   	}
+  	*/
   	for(auto word : allPossibleWords){
   		if(compare_two_strings(word, allPossibleWords[guess_idx]) == result){
   			tmp.push_back(word);
@@ -103,15 +105,11 @@ int guess(vector<string> &allPossibleWords){
   	}
   	allPossibleWords.clear();
   	allPossibleWords = tmp;
-  	if(result == 242){
-  		cout << "Congratulations!" << endl;
-  		return 0;
-  	}
-  	return 1;
+  	return allPossibleWords[guess_idx];
 }
 
 
-int init(vector<string> &allPossibleWords){
+string init(vector<string> &allPossibleWords, int result){
 	vector<vector<int>> words_dist(allPossibleWords.size(), vector<int>(242));
 	ifstream dists;
 	dists.open("/Users/ryanovovo/Documents/wordle-solver/all_words_dist.txt");
@@ -151,12 +149,13 @@ int init(vector<string> &allPossibleWords){
   		}
   	}
   	vector<string> tmp;
-  	string raw_result;
-  	cout << "best guess :" << allPossibleWords[guess_idx] << endl;
-  	cout << "input result" << endl;
-  	cin >> raw_result;
-  	int result = 0;
+  	//string raw_result;
+  	// cout << "best guess :" << allPossibleWords[guess_idx] << endl;
+  	// cout << "input result" << endl;
+  	// cin >> raw_result;
+  	//int result = 0;
   	int pow = 1;
+  	/*
   	for(int i = 0; i < 5; i++){
   		if(raw_result[i] == 'o'){
   			result += pow*2;
@@ -166,6 +165,7 @@ int init(vector<string> &allPossibleWords){
   		}
   		pow *=3;
   	}
+  	*/
   	for(auto word : allPossibleWords){
   		if(compare_two_strings(word, allPossibleWords[guess_idx]) == result){
   			tmp.push_back(word);
@@ -173,15 +173,35 @@ int init(vector<string> &allPossibleWords){
   	}
   	allPossibleWords.clear();
   	allPossibleWords = tmp;
-  	if(result == 242){
-  		cout << "Congratulations!" << endl;
-  		return 0;
-  	}
-  	return 1;
+  	return allPossibleWords[guess_idx];
+}
+
+int game(vector<string> &allPossibleWords, vector<string> &allPossibleWords_cpy){
+	string st = "lares";
+	for(auto word : allPossibleWords_cpy){
+		int res = compare_two_strings(word, st);
+		allPossibleWords = allPossibleWords_cpy;
+		string g = init(allPossibleWords, res);
+		for(int i = 1; i < 7; i++){
+			res = compare_two_strings(word, g);
+			// cout << res << endl;
+			// cout << g << endl;
+			if(res != 242){
+				g = guess(allPossibleWords, res);
+			}
+			else{
+				cout << i << endl;
+				break;
+			}
+			if(i == 6){
+				cout << word << endl;
+			}
+		}
+	}
+	return 0;
 }
 
 int main () {
-	
  	string line;
  	vector<string> allPossibleWords;
   	ifstream words ("/Users/ryanovovo/Documents/wordle-solver/words.txt");
@@ -194,8 +214,8 @@ int main () {
   	else{
   		cout << "Unable to open words!" << endl;
   	}
+  	vector<string> allPossibleWords_cpy = allPossibleWords;
   	cout << "start" << endl;
-  	init(allPossibleWords);
-  	while(guess(allPossibleWords));
+  	game(allPossibleWords, allPossibleWords_cpy);
   	
 }
