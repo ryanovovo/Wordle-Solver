@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -195,7 +194,11 @@ int main () {
   		cout << "Unable to open words!" << endl;
   	}
   	cout << "start" << endl;
-  	init(allPossibleWords);
-  	while(guess(allPossibleWords));
+  	auto allPossibleWords_cpy = allPossibleWords;
+  	while(true){
+  		allPossibleWords_cpy = allPossibleWords;
+  		init(allPossibleWords_cpy);
+  		while(guess(allPossibleWords_cpy));
+  	}
   	
 }
