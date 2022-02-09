@@ -6,4 +6,4 @@ o = green
 
 _ = yellow
 
-x = gray
+x = black
