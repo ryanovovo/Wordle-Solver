@@ -36,7 +36,7 @@ inline int diff_two_strings(const string &lhs, const string &rhs){
 	return res;
 }
 
-inline double standard_deviation(const vector<int> &v){
+inline double variance(const vector<int> &v){
 	int n = v.size();
 	double avg = 0.0;
 	double sum = 0.0;
@@ -44,12 +44,12 @@ inline double standard_deviation(const vector<int> &v){
 		sum += (double)v[i];
 	}
 	avg = sum / (double)n;
-	double stdev = 0.0;
+	double vnc = 0.0;
 	for(int i = 0; i < n; i++){
-		stdev += (avg-(double)v[i]) * (avg-(double)v[i]);
+		vnc += (avg-(double)v[i]) * (avg-(double)v[i]);
 	}
-	stdev /= (double)n;
-	return stdev;
+	vnc /= (double)n;
+	return vnc;
 }
 
 vector<vector<int>> all_words_dist(vector<string> &words){
@@ -70,12 +70,12 @@ vector<vector<int>> all_words_dist(vector<string> &words){
 }
 
 int guess(vector<string> &allPossibleWords, vector<vector<int>> &words_dist){
-  	double min_stdev = 99999.0;
+  	double min_vnc = 99999.0;
   	int guess_idx = 0;
   	for(unsigned int i = 0; i < allPossibleWords.size(); i++){
-  		double stdev = standard_deviation(words_dist[i]);
-  		if(stdev < min_stdev){
-  			min_stdev = stdev;
+  		double vnc = variance(words_dist[i]);
+  		if(vnc < min_vnc){
+  			min_vnc = vnc;
   			guess_idx = i;
   		}
   	}
