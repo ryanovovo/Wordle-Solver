@@ -46,7 +46,7 @@ inline double variance(const vector<int> &v){
 	avg = sum / (double)n;
 	double vnc = 0.0;
 	for(int i = 0; i < n; i++){
-		vnc += (avg-(double)v[i]) * (avg-(double)v[i]);
+		vnc += (avg-(double)v[i]) * (avg-(double)v[i]) * (double)v[i] / (double)n;
 	}
 	vnc /= (double)n;
 	return vnc;
