@@ -11,7 +11,7 @@ const int total_diffs = 243;
 
 vector<string> all_words(total_words);
 vector<vector<int>> all_words_dist(total_words, vector<int>(total_diffs));
-vector<vector<int>> all_words_diff(total_words, vector<int>(total_words));
+// vector<vector<int>> all_words_diff(total_words, vector<int>(total_words));
 map<string, int> word_idx;
 vector<int> possible_ans_idx;
 
@@ -19,7 +19,36 @@ vector<int> possible_ans_idx;
 // 計算答案和猜測的diff值
 
 int diff_answer_and_guess(const int &ans_idx, const int &guess_idx){
-	return all_words_diff[ans_idx][guess_idx];
+	int res = 0;
+	int pow = 1;
+	string rhs = all_words[guess_idx];
+	string lhs = all_words[ans_idx];
+	vector<int> is_used_lhs(5, 0);
+	vector<int> is_used_rhs(5, 0);
+	for(int i = 0; i < 5; i++){
+		if(lhs[i] == rhs[i]){
+			res += pow * 2;
+			is_used_lhs[i] = 1;
+			is_used_rhs[i] = 1;
+		}
+		pow *= 3;
+	}
+	for(int i = 0; i < 5; i++){
+		pow = 1;
+		if(is_used_lhs[i] == 1){
+			continue;
+		}
+		for(int j = 0; j < 5; j++){
+			if(lhs[i] == rhs[j] && is_used_rhs[j] != 1){
+				res += pow;
+				is_used_lhs[i] = 1;
+				is_used_rhs[j] = 1;
+				break;
+			}
+			pow *= 3;
+		}
+	}
+	return res;
 }
 
 // 取得字串的index
@@ -149,13 +178,13 @@ void init(){
 
   	ifstream words ("/Users/ryanovovo/Documents/wordle-solver/words.txt");
   	ifstream dist  ("/Users/ryanovovo/Documents/wordle-solver/all_words_dist.txt");
-  	ifstream diff  ("/Users/ryanovovo/Documents/wordle-solver/all_words_diff.txt");
+  	// ifstream diff  ("/Users/ryanovovo/Documents/wordle-solver/all_words_diff.txt");
 
   	//檢查是否成功開啟檔案
 
   	assert(words.is_open());
   	assert(dist.is_open());
-  	assert(diff.is_open());
+  	// assert(diff.is_open());
 
   	//將檔案內容導入容器中
 
@@ -190,7 +219,7 @@ void init(){
 	dist.close();
  
   
-	
+	/*
 	for(int i = 0; getline(diff, line); i++){
 		string tmp;
 		int it = 0;
@@ -206,6 +235,7 @@ void init(){
 		}
 	}
 	diff.close();
+	*/
 	
 
 	cout << "Finished Initializing" << endl;
