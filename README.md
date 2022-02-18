@@ -2,8 +2,8 @@
 
 input result:
 
-o = green
+o = 🟩
 
-_ = yellow
+_ = 🟨
 
-x = black
+x = ⬛
