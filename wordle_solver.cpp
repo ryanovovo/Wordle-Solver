@@ -3,11 +3,14 @@
 #include <cassert>
 #include <map>
 #include <fstream>
+#include <type_traits>
 using namespace std;
 
 
 const int total_words = 12972;
 const int total_diffs = 243;
+
+char difficulty; // n = normal mode, h = hard mode
 
 vector<string> all_words(total_words);
 vector<vector<int>> all_words_dist(total_words, vector<int>(total_diffs));
@@ -45,6 +48,7 @@ double variance(const vector<int> &v){
 	return var;
 }
 
+
 int get_encoded_result(const string &raw_result){
 	int result = 0;
   	int pow = 1;
@@ -60,45 +64,22 @@ int get_encoded_result(const string &raw_result){
   	return result;
 }
 
-// 選擇變異數最小的單字作為最佳候選單字 
-// true = 已找出正確答案, false = 仍要繼續找
 
-int guess(){
-	// 初始參數
+template <typename T>
+int get_answer(const int &best_guess_idx, const T &raw_result){
+	// 將結果轉換為編碼後的格式
 
-	double min_variance = 999999999.0;
-	int best_guess_idx  = 0;
-
-	
-	// 預處理得知lares為遊戲開始時的最佳猜測
-	if(possible_ans_idx.size() == total_words){
-		best_guess_idx = 7313; // lares 的 index
+	int result = 0;
+	if constexpr(is_same_v<T, int>){
+		result = raw_result;
+	}
+	else if constexpr(is_same_v<T, string>){
+		result = get_encoded_result(raw_result);
 	}
 	else{
-		//取得所有可猜測字對可能答案的變異數，並選擇最小的那個作為最佳猜測
-
-		for(unsigned int i = 0; i < total_words; i++){
-			vector<int> distribution(total_diffs, 0);
-			for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
-				distribution[diff_answer_and_guess(possible_ans_idx[j], i)]++;
-			}
-			double var = variance(distribution);
-			if(var < min_variance){
-				min_variance = var;
-				best_guess_idx = i;
-			}
-		}
+		assert(false);
 	}
-
 	
-	// 印出最佳猜測的單字到螢幕
-
-	return best_guess_idx;
-}
-
-
-bool get_result(int result, int best_guess_idx){
-
 
 	// 將結果與可能的答案比對
 
@@ -112,16 +93,72 @@ bool get_result(int result, int best_guess_idx){
 	possible_ans_idx = new_possible_ans_idx;
 	
 
-	//輸出最佳猜測
+	// 若找到正確解答則回傳解答的index, 否則回傳-1
 
 	if(possible_ans_idx.size() == 1){
-		cout << "Correct answer: " << all_words.at(possible_ans_idx.at(0)) << endl;
-		return true;
+		// cout << "Correct answer: " << all_words.at(possible_ans_idx.at(0)) << endl;
+		return possible_ans_idx.at(0);
 	}
 	else{
-		return false;
+		return -1;
 	}
+
 }
+
+
+
+int guess(){ 
+	// 初始參數
+
+	double min_variance = 999999999.0;
+	int best_guess_idx  = 0;
+
+	
+	// 預處理得知lares為遊戲開始時的最佳猜測
+	if(possible_ans_idx.size() == total_words){
+		best_guess_idx = 7313; // lares 的 index
+	}
+	else{
+		//取得所有可猜測字對可能答案的變異數，並選擇最小的那個作為最佳猜測
+
+		if(difficulty == 'n'){ // normal mode
+			for(unsigned int i = 0; i < total_words; i++){
+				vector<int> distribution(total_diffs, 0);
+				for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
+					distribution[diff_answer_and_guess(possible_ans_idx[j], i)]++;
+				}
+				double var = variance(distribution);
+				if(var < min_variance){
+					min_variance = var;
+					best_guess_idx = i;
+				}
+			}
+		}
+		else{ // hard mode
+			for(unsigned int i = 0; i < possible_ans_idx.size(); i++){
+				vector<int> distribution(total_diffs, 0);
+				for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
+					distribution[diff_answer_and_guess(possible_ans_idx[j], possible_ans_idx[i])]++;
+				}
+				double var = variance(distribution);
+				if(var < min_variance){
+					min_variance = var;
+					best_guess_idx = possible_ans_idx[i];
+				}
+			}
+		}
+	}
+
+	
+	// 印出最佳猜測的單字到螢幕
+
+	// cout << "Best guess: " << all_words.at(best_guess_idx) << endl;
+
+	// 回傳最佳猜測答案的編號 
+
+	return best_guess_idx;
+}
+
 
 
 // 清空所有可能的答案回到初始狀態
@@ -212,22 +249,23 @@ void init(){
 
 int main(){
 	init();
-	vector<int> counter(100, 0);
-	for(int i = 0; i < total_words; i++){
-		int cnt = 0;
+
+	cout << "choose game difficulty" << endl;
+	cout << "n = normal mode, h = hard mode" << endl;
+	cin >> difficulty;
+
+	while(true){
+		clear_possible_ans_idx();
 		while(true){
-			cnt++;
-			int g = guess();
-			int res = diff_answer_and_guess(i, g);
-			if(get_result(res, g)){
-				cout << cnt << endl;
-				counter[cnt]++;
-				clear_possible_ans_idx();
+			int best_guess_idx = guess();
+			cout << "best guess: " << all_words.at(best_guess_idx) << endl;
+			string raw_result;
+			cin >> raw_result;
+			int correct_ans_idx = get_answer(best_guess_idx, raw_result);
+			if(correct_ans_idx > 0){
+				cout << "Correst answer: " << all_words.at(correct_ans_idx) << endl;
 				break;
 			}
 		}
-	}
-	for(int i = 1; i < 10; i++){
-		cout << "有" << counter[i] << "次使用了" << i << "次猜中" << endl;
 	}
 }
