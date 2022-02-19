@@ -4,6 +4,8 @@
 #include <map>
 #include <fstream>
 #include <type_traits>
+#include <thread>
+#include <future>
 using namespace std;
 
 
@@ -43,7 +45,7 @@ double variance(const vector<int> &v){
 	avg = sum / (double)n;
 	double var = 0.0;
 	for(int i = 0; i < n; i++){
-		var += (avg-(double)v[i]) * (avg-(double)v[i]) / (double)n;
+		var += (avg-(double)v[i]) * (avg-(double)v[i]) * (double)v[i] / (double)n;
 	}
 	return var;
 }
@@ -107,49 +109,88 @@ int get_answer(const int &best_guess_idx, const T &raw_result){
 
 
 
-int guess(){ 
+//回傳{最佳猜測結果的idx, 最小變異數}
+
+pair<int, double> get_min_variance(const int &l, const int &r){
 	// 初始參數
 
 	double min_variance = 999999999.0;
 	int best_guess_idx  = 0;
 
-	
+
 	// 預處理得知lares為遊戲開始時的最佳猜測
+
 	if(possible_ans_idx.size() == total_words){
 		best_guess_idx = 7313; // lares 的 index
+		return {best_guess_idx, 0.0};
+	}
+
+
+	//取得範圍內可猜測字對可能答案的變異數，並選擇最小的那個作為最佳猜測
+
+	if(difficulty == 'n'){ // normal mode
+		for(unsigned int i = l; i < r; i++){
+			vector<int> distribution(total_diffs, 0);
+			for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
+				distribution[diff_answer_and_guess(possible_ans_idx[j], i)]++;
+			}
+			double var = variance(distribution);
+			if(var < min_variance){
+				min_variance = var;
+				best_guess_idx = i;
+			}
+		}
+	}
+	else{ // hard mode
+		for(unsigned int i = l; i < r; i++){
+			vector<int> distribution(total_diffs, 0);
+			for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
+				distribution[diff_answer_and_guess(possible_ans_idx[j], possible_ans_idx[i])]++;
+			}
+			double var = variance(distribution);
+			if(var < min_variance){
+				min_variance = var;
+				best_guess_idx = possible_ans_idx[i];
+			}
+		}
+	}
+	return {best_guess_idx, min_variance};
+}
+
+
+int guess(){ 
+	
+	int best_guess_idx = 0;
+	double min_variance = 99999999.0;
+
+
+	int total_threads = 4;
+	int segment = 0;
+	vector<future<pair<int, double>>> futures;
+
+
+	if(difficulty == 'n'){
+		segment = total_words / total_threads;
+		futures.push_back(async(get_min_variance, total_words-segment, total_words));
 	}
 	else{
-		//取得所有可猜測字對可能答案的變異數，並選擇最小的那個作為最佳猜測
-
-		if(difficulty == 'n'){ // normal mode
-			for(unsigned int i = 0; i < total_words; i++){
-				vector<int> distribution(total_diffs, 0);
-				for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
-					distribution[diff_answer_and_guess(possible_ans_idx[j], i)]++;
-				}
-				double var = variance(distribution);
-				if(var < min_variance){
-					min_variance = var;
-					best_guess_idx = i;
-				}
-			}
-		}
-		else{ // hard mode
-			for(unsigned int i = 0; i < possible_ans_idx.size(); i++){
-				vector<int> distribution(total_diffs, 0);
-				for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
-					distribution[diff_answer_and_guess(possible_ans_idx[j], possible_ans_idx[i])]++;
-				}
-				double var = variance(distribution);
-				if(var < min_variance){
-					min_variance = var;
-					best_guess_idx = possible_ans_idx[i];
-				}
-			}
-		}
+		segment = possible_ans_idx.size() / total_threads;
+		futures.push_back(async(get_min_variance, possible_ans_idx.size()-segment, possible_ans_idx.size()));
 	}
 
+	for(int i = 0; i < total_threads-1; i++){
+		futures.push_back(async(get_min_variance, i * segment, (i+1) * segment));
+	}
+
+	for(auto &f : futures){
+		auto res = f.get();
+		if(res.second < min_variance){
+			min_variance = res.second;
+			best_guess_idx = res.first;
+		}
+	}
 	
+
 	// 回傳最佳猜測答案的編號 
 
 	return best_guess_idx;
@@ -250,15 +291,14 @@ int main(){
 	cout << "n = normal mode, h = hard mode" << endl;
 	cin >> difficulty;
 
-	while(true){
+	for(int i = 0; i < total_words; i++){
 		clear_possible_ans_idx();
 		while(true){
 			int best_guess_idx = guess();
-			cout << "best guess: " << all_words.at(best_guess_idx) << endl;
-			string raw_result;
-			cin >> raw_result;
+			int raw_result = diff_answer_and_guess(i, best_guess_idx);
 			int correct_ans_idx = get_answer(best_guess_idx, raw_result);
-			if(correct_ans_idx > 0){
+			cout << raw_result << endl;
+			if(correct_ans_idx > 0 || raw_result == 242){
 				cout << "Correst answer: " << all_words.at(correct_ans_idx) << endl;
 				break;
 			}

@@ -4,6 +4,7 @@
 #include <map>
 #include <fstream>
 #include <type_traits>
+#include <set>
 using namespace std;
 
 
@@ -33,17 +34,15 @@ int get_word_idx(const string &word){
 
 // 計算數據的變異數
 
-double variance(const vector<int> &v){
+int variance(const vector<int> &v){
 	int n = v.size();
-	double avg = 0.0;
-	double sum = 0.0;
+	int var = 0;
+	vector<int> is_used(total_diffs, 0);
 	for(int i = 0; i < n; i++){
-		sum += (double)v[i];
-	}
-	avg = sum / (double)n;
-	double var = 0.0;
-	for(int i = 0; i < n; i++){
-		var += (avg-(double)v[i]) * (avg-(double)v[i]) / (double)n;
+		if(is_used.at(v[i]) == 0){
+			var++;
+			is_used[v[i]] = 1;
+		}
 	}
 	return var;
 }
@@ -110,7 +109,7 @@ int get_answer(const int &best_guess_idx, const T &raw_result){
 int guess(){ 
 	// 初始參數
 
-	double min_variance = 999999999.0;
+	int max_variance = 0;
 	int best_guess_idx  = 0;
 
 	
@@ -123,13 +122,13 @@ int guess(){
 
 		if(difficulty == 'n'){ // normal mode
 			for(unsigned int i = 0; i < total_words; i++){
-				vector<int> distribution(total_diffs, 0);
+				vector<int> distribution;
 				for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
-					distribution[diff_answer_and_guess(possible_ans_idx[j], i)]++;
+					distribution.push_back(diff_answer_and_guess(possible_ans_idx[j], i));
 				}
-				double var = variance(distribution);
-				if(var < min_variance){
-					min_variance = var;
+				int var = variance(distribution);
+				if(var > max_variance){
+					max_variance = var;
 					best_guess_idx = i;
 				}
 			}
@@ -140,9 +139,9 @@ int guess(){
 				for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
 					distribution[diff_answer_and_guess(possible_ans_idx[j], possible_ans_idx[i])]++;
 				}
-				double var = variance(distribution);
-				if(var < min_variance){
-					min_variance = var;
+				int var = variance(distribution);
+				if(var > max_variance){
+					max_variance = var;
 					best_guess_idx = possible_ans_idx[i];
 				}
 			}
@@ -150,6 +149,10 @@ int guess(){
 	}
 
 	
+	// 印出最佳猜測的單字到螢幕
+
+	// cout << "Best guess: " << all_words.at(best_guess_idx) << endl;
+
 	// 回傳最佳猜測答案的編號 
 
 	return best_guess_idx;
@@ -243,6 +246,26 @@ void init(){
   	return;
 }
 
+
+void test(vector<int> &counter, int l, int r){
+	for(int i = l; i < r; i++){
+		clear_possible_ans_idx();
+		int cnt = 0;
+		while(true){
+			cnt++;
+			int best_guess_idx = guess();
+			// cout << "best guess: " << all_words.at(best_guess_idx) << endl;
+			int raw_result = diff_answer_and_guess(i, best_guess_idx);
+			int correct_ans_idx = get_answer(best_guess_idx, raw_result);
+			if(correct_ans_idx > 0 || raw_result == 242){
+				cout << "Correst answer: " << all_words.at(correct_ans_idx) << " guess " << cnt << " times" << endl;
+				break;
+			}
+		}
+		counter[cnt]++;
+	}
+}
+
 int main(){
 	init();
 
@@ -250,18 +273,11 @@ int main(){
 	cout << "n = normal mode, h = hard mode" << endl;
 	cin >> difficulty;
 
-	while(true){
-		clear_possible_ans_idx();
-		while(true){
-			int best_guess_idx = guess();
-			cout << "best guess: " << all_words.at(best_guess_idx) << endl;
-			string raw_result;
-			cin >> raw_result;
-			int correct_ans_idx = get_answer(best_guess_idx, raw_result);
-			if(correct_ans_idx > 0){
-				cout << "Correst answer: " << all_words.at(correct_ans_idx) << endl;
-				break;
-			}
-		}
+
+	vector<int> counter(100, 0);
+	test(counter, 0, total_words);
+
+	for(int i = 0; i < 20; i++){
+		cout << counter[i] << endl;
 	}
 }
