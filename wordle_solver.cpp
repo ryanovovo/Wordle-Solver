@@ -4,7 +4,9 @@
 #include <map>
 #include <fstream>
 #include <type_traits>
-#include <set>
+#include <ctime>
+#include <random>
+#include <chrono>
 using namespace std;
 
 
@@ -238,16 +240,18 @@ void init(){
 
 
 // 測試指定範圍內的單字所需的猜測次數，並回傳統計次數
-vector<int> test(int l, int r){
+vector<int> test(int times){
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	minstd_rand0 rnd (seed);
 	vector<int> counter;
-	for(int i = l; i < r; i++){
+	for(int i = 0; i < times; i++){
 		clear_possible_ans_idx();
 		int cnt = 0;
+		int answer = (rnd() % total_words);
 		while(true){
 			cnt++;
 			int best_guess_idx = guess();
-			// cout << "best guess: " << all_words.at(best_guess_idx) << endl;
-			int raw_result = diff_answer_and_guess(i, best_guess_idx);
+			int raw_result = diff_answer_and_guess(answer, best_guess_idx);
 			int correct_ans_idx = filter_answer(best_guess_idx, raw_result);
 			if(correct_ans_idx > 0 || raw_result == 242){
 				cout << "Answer: " << all_words.at(correct_ans_idx) << " guess " << cnt << " times" << endl;
@@ -291,16 +295,16 @@ int main(){
 		solve();
 	}
 	else if(mode == 't'){
-		int l, r;
-		cout << "Input test range" << endl;
-		cin >> l >> r;
-		vector<int> counter = test(l, r);
+		int times;
+		cout << "Input test times" << endl;
+		cin >> times;
+		vector<int> counter = test(times);
 		double avg = 0;
 		for(int i = 0; i < counter.size(); i++){
 			cout << i << " guess correct: " << counter[i] << endl;
 			avg += (double)i * (double)counter[i];
 		}
-		avg /= (r - l + 1);
+		avg /= (double)times;
 		cout << "Average guess: " << avg << endl;
 	}
 }
