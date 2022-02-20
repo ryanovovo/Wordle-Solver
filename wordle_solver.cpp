@@ -281,7 +281,7 @@ void solve(){
 			}
 			int correct_ans_idx = filter_answer(best_guess_idx, raw_result);
 			if(correct_ans_idx > 0){
-				cout << "Correst answer: " << all_words.at(correct_ans_idx) << endl;
+				cout << "Correct answer: " << all_words.at(correct_ans_idx) << endl;
 				break;
 			}
 		}
