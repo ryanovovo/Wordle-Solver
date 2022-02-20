@@ -48,7 +48,7 @@ double variance(const vector<int> &data){
 	avg = sum / (double)data_size;
 	double var = 0.0;
 	for(int i = 0; i < data_size; i++){
-		var += (avg-(double)data[i]) * (avg-(double)data[i]) * (double)data[i] / (double)data_size;
+		var += (avg-(double)data[i]) * (avg-(double)data[i]) / (double)data_size;
 	}
 	return var;
 }
