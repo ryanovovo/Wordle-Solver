@@ -61,10 +61,11 @@ vector<int> discretize(vector<int> &data){
 	for(int i = 0; i < data_size; i++){
 		if(is_used[data[i]] == -1){
 			is_used[data[i]] = idx;
+			discretize_data[idx]++;
 			idx++;
 		}
 		else{
-			discretize_data[idx]++;
+			discretize_data[is_used[data[i]]]++;
 		}
 	}
 	return discretize_data;
@@ -294,9 +295,13 @@ int main(){
 		cout << "Input test range" << endl;
 		cin >> l >> r;
 		vector<int> counter = test(l, r);
+		double avg = 0;
 		for(int i = 0; i < counter.size(); i++){
 			cout << i << " guess correct: " << counter[i] << endl;
+			avg += (double)i * (double)counter[i];
 		}
+		avg /= (r - l + 1);
+		cout << "Average guess: " << avg << endl;
 	}
 }
 
