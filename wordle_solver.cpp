@@ -246,7 +246,7 @@ vector<int> test(int times){
 	vector<int> counter;
 	for(int i = 0; i < times; i++){
 		clear_possible_ans_idx();
-		int cnt = 0;
+		int cnt = 1;
 		int answer = (rnd() % total_words);
 		while(true){
 			cnt++;
