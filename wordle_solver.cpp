@@ -58,16 +58,16 @@ double variance(const vector<int> &data){
 vector<int> discretize(vector<int> &data){
 	int data_size = data.size();
 	vector<int> discretize_data(data_size, 0);
-	vector<int> is_used(total_diffs, -1);
+	vector<int> mp(total_diffs, -1);
 	int idx = 0;
 	for(int i = 0; i < data_size; i++){
-		if(is_used[data[i]] == -1){
-			is_used[data[i]] = idx;
+		if(mp[data[i]] == -1){
+			mp[data[i]] = idx;
 			discretize_data[idx]++;
 			idx++;
 		}
 		else{
-			discretize_data[is_used[data[i]]]++;
+			discretize_data[mp[data[i]]]++;
 		}
 	}
 	return discretize_data;
@@ -143,7 +143,7 @@ int guess(){
 	}
 	
 
-	//取得所有可猜測字對可能答案的變異數，並選擇最小的那個作為最佳猜測
+	//取得所有可猜測字對可能答案的變異數，並選擇變異數最小的作為最佳猜測
 	if(difficulty == 'n'){ // normal mode
 		for(unsigned int i = 0; i < total_words; i++){
 			vector<int> diff_result;
@@ -242,12 +242,13 @@ void init(){
 // 測試指定範圍內的單字所需的猜測次數，並回傳統計次數
 vector<int> test(int times){
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-	minstd_rand0 rnd (seed);
+	mt19937 gen(seed);
+	uniform_int_distribution<> distrib(0, total_words-1);
 	vector<int> counter;
 	for(int i = 0; i < times; i++){
 		clear_possible_ans_idx();
 		int cnt = 1;
-		int answer = (rnd() % total_words);
+		int answer = distrib(gen);
 		while(true){
 			cnt++;
 			int best_guess_idx = guess();
@@ -308,10 +309,4 @@ int main(){
 		cout << "Average guess: " << avg << endl;
 	}
 }
-
-
-
-
-
-
 
