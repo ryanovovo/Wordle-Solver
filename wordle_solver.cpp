@@ -293,38 +293,51 @@ void solve(){
 
 int main(){
 	init();
-	int total_threads = 4;
+	int total_threads = 8;
 	if(mode == 's'){
 		solve();
 	}
 	else if(mode == 't'){
-		int test_times;
-		cout << "Input test times" << endl;
-		cin >> test_times;
-		int segment = test_times / total_threads;
-		vector<future<vector<int>>> threads;
-		for(int i = 0; i < total_threads; i++){
-			threads.push_back(async(test, segment));
-		}
-		vector<int> counter;
-		for(int i = 0; i < total_threads; i++){
-			vector<int> tmp = threads[i].get();
-			if(counter.size() < tmp.size()){
-				counter.resize(tmp.size());
+		while(true){
+			int test_times = 0;
+			double avg = 0.0;
+			vector<int> counter;
+
+			cout << "Input test times" << endl;
+			cin >> test_times;
+
+			int segment = test_times / total_threads;
+
+			vector<future<vector<int>>> threads;
+
+			for(int i = 0; i < total_threads; i++){
+				if(i == total_threads - 1){
+					threads.push_back(async(test, (test_times - segment * (total_threads-1))));
+				}
+				else{
+					threads.push_back(async(test, segment));
+				}
 			}
-			for(int j = 0; j < tmp.size(); j++){
-				int times = tmp[j];
-				counter[j] += times;
+
+
+			for(int i = 0; i < total_threads; i++){
+				vector<int> tmp = threads[i].get();
+				if(counter.size() < tmp.size()){
+					counter.resize(tmp.size());
+				}
+				for(int j = 0; j < tmp.size(); j++){
+					int times = (int)tmp[j];
+					counter[j] += times;
+				}
 			}
+			
+			for(int i = 0; i < counter.size(); i++){
+				cout << i << " guess correct: " << counter[i] << endl;
+				avg += (double)i * (double)counter[i];
+			}
+			avg /= (double)test_times;
+			cout << "Average guess: " << avg << endl;
 		}
-		
-		double avg = 0.0;
-		for(int i = 0; i < counter.size(); i++){
-			cout << i << " guess correct: " << counter[i] << endl;
-			avg += (double)i * (double)counter[i];
-		}
-		avg /= (double)test_times;
-		cout << "Average guess: " << avg << endl;
 		
 	}
 }
