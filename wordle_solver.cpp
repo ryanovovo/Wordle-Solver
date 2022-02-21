@@ -23,7 +23,6 @@ char mode; // s = solve mode, t = test mode
 
 vector<string> all_words(total_words); // 所有可以猜的單字
 vector<vector<int>> all_words_diff(total_words, vector<int>(total_words, 0)); // 所有單字互相diff後的值
-// vector<int> possible_ans_idx; // 可能答案的index
 
 
 // 清空所有可以猜的單字index回到初始狀態
