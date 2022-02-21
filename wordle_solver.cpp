@@ -15,7 +15,7 @@ using namespace std;
 // 程式所需變數
 const int total_words = 12972; // 總字數
 const int total_diffs = 243; // 兩單字經diff運算後可得的最大值+1
-const int total_threads = 8; // 總線程數
+const int total_threads = max(1, std::thread::hardware_concurrency()); // 最大可使用的執行緒數
 
 char difficulty; // n = normal difficulty, h = hard difficulty
 char mode; // s = solve mode, t = test mode
@@ -255,7 +255,7 @@ void init(){
 }
 
 
-
+// 取得單次隨機猜測所需的次數
 int get_random_guess_times(){
 	vector<int> possible_ans_idx;
 	clear_possible_ans_idx(possible_ans_idx);
@@ -320,7 +320,7 @@ vector<int> test(int test_times){
 }
 
 
-// 開始解wordle
+// 解wordle
 void solve(){
 	vector<int> possible_ans_idx;
 	while(true){
@@ -365,8 +365,7 @@ int main(){
 
 			avg /= (double)test_times;
 			cout << "Average guess: " << avg << endl;
-		}
-		
+		}	
 	}
 }
 
