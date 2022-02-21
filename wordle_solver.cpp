@@ -7,6 +7,7 @@
 #include <ctime>
 #include <random>
 #include <chrono>
+#include <future>
 using namespace std;
 
 
@@ -19,11 +20,11 @@ char mode; // s = solve mode, t = test mode
 
 vector<string> all_words(total_words); // 所有可以猜的單字
 vector<vector<int>> all_words_diff(total_words, vector<int>(total_words)); // 所有單字互相diff後的值
-vector<int> possible_ans_idx; // 可能答案的index
+// vector<int> possible_ans_idx; // 可能答案的index
 
 
 // 清空所有可以猜的單字index回到初始狀態
-void clear_possible_ans_idx(){
+void clear_possible_ans_idx(vector<int> &possible_ans_idx){
 	possible_ans_idx.clear();
 	for(int i = 0; i < total_words; i++){
 		possible_ans_idx.push_back(i);
@@ -93,7 +94,7 @@ int get_encoded_result(const string &raw_result){
 
 // 將可能的答案篩出
 template <typename T>
-int filter_answer(const int &best_guess_idx, const T &raw_result){
+int filter_answer(const int &best_guess_idx, const T &raw_result, vector<int> &possible_ans_idx){
 	// 將結果轉換為編碼後的格式
 	int result = 0;
 	if constexpr(is_same_v<T, int>){
@@ -130,7 +131,7 @@ int filter_answer(const int &best_guess_idx, const T &raw_result){
 
 
 // 計算最佳猜測的單字編號
-int guess(){ 
+int guess(vector<int> &possible_ans_idx){ 
 	// 初始參數
 	double min_variance = 999999999.0;
 	int best_guess_idx  = 0;
@@ -196,9 +197,7 @@ void init(){
   	//將檔案內容導入容器中
 
   	//將可能的答案編號（0~total_words）導入容器中
-  	for(int i = 0; i < total_words; i++){
-  		possible_ans_idx.push_back(i);
-  	}
+  	// clear_possible_ans_idx(possible_ans_idx);
 
   	// 將可以猜的單字導入到容器中
 	for(int i = 0; getline(words, line); i++){
@@ -245,15 +244,16 @@ vector<int> test(int times){
 	mt19937 gen(seed);
 	uniform_int_distribution<> distrib(0, total_words-1);
 	vector<int> counter;
+	vector<int> possible_ans_idx;
 	for(int i = 0; i < times; i++){
-		clear_possible_ans_idx();
+		clear_possible_ans_idx(possible_ans_idx);
 		int cnt = 1;
 		int answer = distrib(gen);
 		while(true){
 			cnt++;
-			int best_guess_idx = guess();
+			int best_guess_idx = guess(possible_ans_idx);
 			int raw_result = diff_answer_and_guess(answer, best_guess_idx);
-			int correct_ans_idx = filter_answer(best_guess_idx, raw_result);
+			int correct_ans_idx = filter_answer(best_guess_idx, raw_result, possible_ans_idx);
 			if(correct_ans_idx > 0 || raw_result == 242){
 				cout << "Answer: " << all_words.at(correct_ans_idx) << " guess " << cnt << " times" << endl;
 				break;
@@ -270,17 +270,18 @@ vector<int> test(int times){
 
 // 開始解wordle
 void solve(){
+	vector<int> possible_ans_idx;
 	while(true){
-		clear_possible_ans_idx();
+		clear_possible_ans_idx(possible_ans_idx);
 		while(true){
-			int best_guess_idx = guess();
+			int best_guess_idx = guess(possible_ans_idx);
 			cout << "best guess: " << all_words.at(best_guess_idx) << endl;
 			string raw_result;
 			cin >> raw_result;
 			if(raw_result == "stop"){
 				return;
 			}
-			int correct_ans_idx = filter_answer(best_guess_idx, raw_result);
+			int correct_ans_idx = filter_answer(best_guess_idx, raw_result, possible_ans_idx);
 			if(correct_ans_idx > 0){
 				cout << "Correct answer: " << all_words.at(correct_ans_idx) << endl;
 				break;
@@ -292,21 +293,39 @@ void solve(){
 
 int main(){
 	init();
+	int total_threads = 4;
 	if(mode == 's'){
 		solve();
 	}
 	else if(mode == 't'){
-		int times;
+		int test_times;
 		cout << "Input test times" << endl;
-		cin >> times;
-		vector<int> counter = test(times);
-		double avg = 0;
+		cin >> test_times;
+		int segment = test_times / total_threads;
+		vector<future<vector<int>>> threads;
+		for(int i = 0; i < total_threads; i++){
+			threads.push_back(async(test, segment));
+		}
+		vector<int> counter;
+		for(int i = 0; i < total_threads; i++){
+			vector<int> tmp = threads[i].get();
+			if(counter.size() < tmp.size()){
+				counter.resize(tmp.size());
+			}
+			for(int j = 0; j < tmp.size(); j++){
+				int times = tmp[j];
+				counter[j] += times;
+			}
+		}
+		
+		double avg = 0.0;
 		for(int i = 0; i < counter.size(); i++){
 			cout << i << " guess correct: " << counter[i] << endl;
 			avg += (double)i * (double)counter[i];
 		}
-		avg /= (double)times;
+		avg /= (double)test_times;
 		cout << "Average guess: " << avg << endl;
+		
 	}
 }
 
