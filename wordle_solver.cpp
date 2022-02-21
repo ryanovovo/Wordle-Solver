@@ -263,7 +263,7 @@ vector<int> test(int times){
 	vector<int> possible_ans_idx;
 	for(int i = 0; i < times; i++){
 		clear_possible_ans_idx(possible_ans_idx);
-		int guess_times = 1;
+		unsigned int guess_times = 1;
 		int answer = distrib(gen);
 		while(true){
 			guess_times++;
@@ -276,7 +276,7 @@ vector<int> test(int times){
 			}
 		}
 		if(guess_times >= counter.size()){
-			counter.resize(+1);
+			counter.resize(guess_times+1);
 		}
 		counter[guess_times]++;
 	}
@@ -340,12 +340,12 @@ int main(){
 				if(counter.size() < tmp.size()){
 					counter.resize(tmp.size());
 				}
-				for(int j = 0; j < tmp.size(); j++){
+				for(unsigned int j = 0; j < tmp.size(); j++){
 					counter[j] += tmp[j];
 				}
 			}
 			
-			for(int i = 0; i < counter.size(); i++){
+			for(unsigned int i = 0; i < counter.size(); i++){
 				cout << i << " guess correct: " << counter[i] << endl;
 				avg += (double)i * (double)counter[i];
 			}
