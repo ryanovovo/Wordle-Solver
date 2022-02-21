@@ -8,18 +8,20 @@
 #include <random>
 #include <chrono>
 #include <future>
+#include <thread>
 using namespace std;
 
 
 // 程式所需變數
 const int total_words = 12972; // 總字數
 const int total_diffs = 243; // 兩單字經diff運算後可得的最大值+1
+const int total_threads = 8; // 總線程數
 
 char difficulty; // n = normal difficulty, h = hard difficulty
 char mode; // s = solve mode, t = test mode
 
 vector<string> all_words(total_words); // 所有可以猜的單字
-vector<vector<int>> all_words_diff(total_words, vector<int>(total_words)); // 所有單字互相diff後的值
+vector<vector<int>> all_words_diff(total_words, vector<int>(total_words, 0)); // 所有單字互相diff後的值
 // vector<int> possible_ans_idx; // 可能答案的index
 
 
@@ -178,9 +180,29 @@ int guess(vector<int> &possible_ans_idx){
 }
 
 
+void string_to_vector(const string &line, const int &row){
+	string tmp;
+	int column = 0;
+	for(auto ch : line){
+		if(ch == ' '){
+			all_words_diff[row][column] = stoi(tmp);
+			column++;
+			tmp.clear();
+		}
+		else{
+			tmp.push_back(ch);
+		}
+	}
+	return;
+}
+
+
+
 //初始化程式
 void init(){
 	cout << "Initializing..." << endl;
+
+	vector<thread> threads(8);
 
 
 	// 開啟必要檔案
@@ -196,9 +218,6 @@ void init(){
 
   	//將檔案內容導入容器中
 
-  	//將可能的答案編號（0~total_words）導入容器中
-  	// clear_possible_ans_idx(possible_ans_idx);
-
   	// 將可以猜的單字導入到容器中
 	for(int i = 0; getline(words, line); i++){
 		all_words[i] = line;
@@ -207,18 +226,16 @@ void init(){
   	
 	// 將所有單字的diff值導入容器中
 	for(int i = 0; getline(diff, line); i++){
-		string tmp;
-		int it = 0;
-		for(auto ch : line){
-			if(ch == ' '){
-				all_words_diff[i][it] = stoi(tmp);
-				it++;
-				tmp.clear();
-			}
-			else{
-				tmp.push_back(ch);
-			}
+		if(i < total_threads){
+			threads[i] = thread(string_to_vector, line, i);
 		}
+		else{
+			threads[i%total_threads].join();
+			threads[i%total_threads] = thread(string_to_vector, line, i);
+		}
+	}
+	for(int i = 0; i < total_threads; i++){
+		threads[i].join();
 	}
 	diff.close();
 
@@ -233,7 +250,6 @@ void init(){
 	cout << "Select mode" << endl;
 	cout << "s = solve mode, t = test mode" << endl;
 	cin >> mode;
-	
   	return;
 }
 
@@ -293,7 +309,6 @@ void solve(){
 
 int main(){
 	init();
-	int total_threads = 8;
 	if(mode == 's'){
 		solve();
 	}
@@ -326,8 +341,7 @@ int main(){
 					counter.resize(tmp.size());
 				}
 				for(int j = 0; j < tmp.size(); j++){
-					int times = (int)tmp[j];
-					counter[j] += times;
+					counter[j] += tmp[j];
 				}
 			}
 			
