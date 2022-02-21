@@ -180,6 +180,7 @@ int guess(vector<int> &possible_ans_idx){
 }
 
 
+// 將讀取到的字串寫入至容器中
 void load_line(const string &line, const int &row){
 	string tmp;
 	int column = 0;
@@ -254,32 +255,67 @@ void init(){
 }
 
 
-// 測試指定範圍內的單字所需的猜測次數，並回傳統計次數
-vector<int> test(int times){
+
+int get_random_guess_times(){
+	vector<int> possible_ans_idx;
+	clear_possible_ans_idx(possible_ans_idx);
+	int guess_times = 1;
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	mt19937 gen(seed);
 	uniform_int_distribution<> distrib(0, total_words-1);
-	vector<int> counter;
-	vector<int> possible_ans_idx;
-	for(int i = 0; i < times; i++){
-		clear_possible_ans_idx(possible_ans_idx);
-		unsigned int guess_times = 1;
-		int answer = distrib(gen);
-		while(true){
-			guess_times++;
-			int best_guess_idx = guess(possible_ans_idx);
-			int raw_result = diff_answer_and_guess(answer, best_guess_idx);
-			int correct_ans_idx = filter_answer(best_guess_idx, raw_result, possible_ans_idx);
-			if(correct_ans_idx > 0 || raw_result == 242){
-				cout << "Answer: " << all_words.at(correct_ans_idx) << " guess " << guess_times << " times" << endl;
-				break;
-			}
+	int answer = distrib(gen);
+	for(int i = 0; i < 2000; i++){
+		guess_times++;
+		int best_guess_idx = guess(possible_ans_idx);
+		int raw_result = diff_answer_and_guess(answer, best_guess_idx);
+		int correct_ans_idx = filter_answer(best_guess_idx, raw_result, possible_ans_idx);
+		if(correct_ans_idx > 0 || raw_result == 242){
+			cout << "Answer: " << all_words.at(correct_ans_idx) << " guess " << guess_times << " times" << endl;
+			return guess_times;
 		}
-		if(guess_times >= counter.size()){
-			counter.resize(guess_times+1);
-		}
-		counter[guess_times]++;
 	}
+	return -1;
+}
+
+
+// 測試指定的猜測次數，並回傳統計次數
+vector<int> test(int test_times){
+	vector<int> counter;
+
+	vector<future<int>> threads(total_threads);
+	for(int i = 0; i < test_times; i++){
+		if(i < total_threads){
+			threads[i] = async(get_random_guess_times);
+		}
+		else{
+			int guess_times = threads[i%total_threads].get();
+			threads[i%total_threads] = async(get_random_guess_times);
+			if(guess_times >= counter.size()){
+				counter.resize(guess_times+1);
+			}
+			counter[guess_times]++;
+		}
+	}
+	
+	if(test_times > total_threads){
+		for(int i = 0; i < total_threads; i++){
+			int guess_times = threads[i%total_threads].get();
+			if(guess_times >= counter.size()){
+				counter.resize(guess_times+1);
+			}
+			counter[guess_times]++;
+		}
+	}
+	else{
+		for(int i = 0; i < test_times; i++){
+			int guess_times = threads[i%total_threads].get();
+			if(guess_times >= counter.size()){
+				counter.resize(guess_times+1);
+			}
+			counter[guess_times]++;
+		}
+	}
+	
 	return counter;
 }
 
@@ -316,39 +352,17 @@ int main(){
 		while(true){
 			int test_times = 0;
 			double avg = 0.0;
-			vector<int> counter;
-
+			
 			cout << "Input test times" << endl;
 			cin >> test_times;
 
-			int segment = test_times / total_threads;
-
-			vector<future<vector<int>>> threads;
-
-			for(int i = 0; i < total_threads; i++){
-				if(i == total_threads - 1){
-					threads.push_back(async(test, (test_times - segment * (total_threads-1))));
-				}
-				else{
-					threads.push_back(async(test, segment));
-				}
-			}
-
-
-			for(int i = 0; i < total_threads; i++){
-				vector<int> tmp = threads[i].get();
-				if(counter.size() < tmp.size()){
-					counter.resize(tmp.size());
-				}
-				for(unsigned int j = 0; j < tmp.size(); j++){
-					counter[j] += tmp[j];
-				}
-			}
+			vector<int> counter = test(test_times);
 			
 			for(unsigned int i = 0; i < counter.size(); i++){
 				cout << i << " guess correct: " << counter[i] << endl;
 				avg += (double)i * (double)counter[i];
 			}
+
 			avg /= (double)test_times;
 			cout << "Average guess: " << avg << endl;
 		}
