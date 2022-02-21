@@ -180,7 +180,7 @@ int guess(vector<int> &possible_ans_idx){
 }
 
 
-void string_to_vector(const string &line, const int &row){
+void load_line(const string &line, const int &row){
 	string tmp;
 	int column = 0;
 	for(auto ch : line){
@@ -227,11 +227,11 @@ void init(){
 	// 將所有單字的diff值導入容器中
 	for(int i = 0; getline(diff, line); i++){
 		if(i < total_threads){
-			threads[i] = thread(string_to_vector, line, i);
+			threads[i] = thread(load_line, line, i);
 		}
 		else{
 			threads[i%total_threads].join();
-			threads[i%total_threads] = thread(string_to_vector, line, i);
+			threads[i%total_threads] = thread(load_line, line, i);
 		}
 	}
 	for(int i = 0; i < total_threads; i++){
@@ -263,22 +263,22 @@ vector<int> test(int times){
 	vector<int> possible_ans_idx;
 	for(int i = 0; i < times; i++){
 		clear_possible_ans_idx(possible_ans_idx);
-		int cnt = 1;
+		int guess_times = 1;
 		int answer = distrib(gen);
 		while(true){
-			cnt++;
+			guess_times++;
 			int best_guess_idx = guess(possible_ans_idx);
 			int raw_result = diff_answer_and_guess(answer, best_guess_idx);
 			int correct_ans_idx = filter_answer(best_guess_idx, raw_result, possible_ans_idx);
 			if(correct_ans_idx > 0 || raw_result == 242){
-				cout << "Answer: " << all_words.at(correct_ans_idx) << " guess " << cnt << " times" << endl;
+				cout << "Answer: " << all_words.at(correct_ans_idx) << " guess " << guess_times << " times" << endl;
 				break;
 			}
 		}
-		if(cnt >= counter.size()){
-			counter.resize(cnt+1);
+		if(guess_times >= counter.size()){
+			counter.resize(+1);
 		}
-		counter[cnt]++;
+		counter[guess_times]++;
 	}
 	return counter;
 }
