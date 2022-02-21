@@ -87,5 +87,14 @@ wordle遊戲的回傳結果請依照下方圖示填入程式中
 
 ### Demo影片
 
-**TBO**
+[<img alt="Wordle Solver Demo" width="400px" src="https://i.imgur.com/VeRcmb7.png" />](https://www.youtube.com/watch?v=6ePgQ4rbVAo)
+
+
+
+
+
+
+
+
+
 
