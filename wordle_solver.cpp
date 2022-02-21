@@ -9,13 +9,14 @@
 #include <chrono>
 #include <future>
 #include <thread>
+#include <algorithm>
 using namespace std;
 
 
 // 程式所需變數
 const int total_words = 12972; // 總字數
 const int total_diffs = 243; // 兩單字經diff運算後可得的最大值+1
-const int total_threads = max(1, std::thread::hardware_concurrency()); // 最大可使用的執行緒數
+const int total_threads = max(1, (int)std::thread::hardware_concurrency()); // 最大可使用的執行緒數
 
 char difficulty; // n = normal difficulty, h = hard difficulty
 char mode; // s = solve mode, t = test mode
