@@ -20,6 +20,7 @@ const int total_threads = max(1, (int)std::thread::hardware_concurrency()); // �
 
 char difficulty; // n = normal difficulty, h = hard difficulty
 char mode; // s = solve mode, t = test mode
+string directory;
 
 vector<string> all_words(total_words); // 所有可以猜的單字
 vector<vector<int>> all_words_diff(total_words, vector<int>(total_words, 0)); // 所有單字互相diff後的值
@@ -205,10 +206,16 @@ void init(){
 
 	vector<thread> threads(8);
 
+	string words_path = directory;
+	string all_words_diff_path = directory;
 
+	words_path.append("words.txt");
+	all_words_diff_path.append("all_words_diff.txt");
+
+	
 	// 開啟必要檔案
-  	ifstream words ("/Users/ryanovovo/Documents/GitHub/wordle-solver/words.txt");
-  	ifstream diff  ("/Users/ryanovovo/Documents/GitHub/wordle-solver/all_words_diff.txt");
+  	ifstream words (words_path);
+  	ifstream diff  (all_words_diff_path);
 
 
   	//檢查是否成功開啟檔案
@@ -343,7 +350,11 @@ void solve(){
 }
 
 
-int main(){
+int main(int argc,char** argv){
+	directory = argv[0];
+	while(directory.back() != '/'){
+		directory.pop_back();
+	}
 	init();
 	if(mode == 's'){
 		solve();
