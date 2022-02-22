@@ -17,27 +17,11 @@ solver.git`
 ### 進入目錄
 `cd wordle-solver`
 
-### 更改檔案路徑
-#### 將程式中186及187行的檔案路徑更改為自己的檔案路徑
-`ifstream words ("/Users/ryanovovo/Documents/GitHub/wordle-solver/words.txt");`
-
-改為
-
-`ifstream words ("YOUR_DIRECTORY/words.txt");`
-
-
-`ifstream diff  ("/Users/ryanovovo/Documents/GitHub/wordle-solver/all_words_diff.txt");`
-
-改為
-
-`ifstream diff  ("YOUR_DIRECTORY/all_words_diff.txt");`
-
-
 
 ### 編譯程式碼
 #### 使用指令
 ```
-g++ -o wordle_solver wordle_solver.cpp
+g++ wordle_solver.cpp -std=c++17 -pthread -o wordle_solver
 ```
 
 ### 執行程式
@@ -87,14 +71,4 @@ wordle遊戲的回傳結果請依照下方圖示填入程式中
 
 ### Demo影片
 
-[<img alt="Wordle Solver Demo" width="400px" src="https://i.imgur.com/VeRcmb7.png" />](https://www.youtube.com/watch?v=6ePgQ4rbVAo)
-
-
-
-
-
-
-
-
-
-
+[![IMAGE ALT TEXT HERE](https://i.imgur.com/VeRcmb7.png =200x200)](https://www.youtube.com/watch?v=6ePgQ4rbVAo)
