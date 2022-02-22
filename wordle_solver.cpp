@@ -27,8 +27,23 @@ vector<string> all_words(total_words); // 所有可以猜的單字
 vector<vector<int>> all_words_diff(total_words, vector<int>(total_words, 0)); // 所有單字互相diff後的值
 
 
+void change_difficulty(){
+	// 選取困難度
+	cout << "choose game difficulty" << endl;
+	cout << "n = normal mode, h = hard mode" << endl;
+	cin >> difficulty;
+}
+
+
+void change_mode(){
+	// 選取模式
+	cout << "Select mode" << endl;
+	cout << "s = solve mode, t = test mode" << endl;
+	cin >> mode;
+}
+
 // 清空所有可以猜的單字index回到初始狀態
-void clear_possible_ans_idx(vector<int> &possible_ans_idx){
+void init_possible_ans_idx(vector<int> &possible_ans_idx){
 	possible_ans_idx.clear();
 	for(int i = 0; i < total_words; i++){
 		possible_ans_idx.push_back(i);
@@ -204,7 +219,9 @@ void load_line(const string &line, const int &row){
 //初始化程式
 void init(){
 	cout << "Total Threads: " << total_threads << endl;
+
 	auto start_time = chrono::high_resolution_clock::now();
+
 	cout << "Initializing..." << endl;
 
 	progressbar bar(total_words);
@@ -259,15 +276,9 @@ void init(){
 	cout << "Load time: " << ms_double.count() << "ms" << endl;
 	cout << "Finished Initializing" << endl;
 
-	// 選取困難度
-	cout << "choose game difficulty" << endl;
-	cout << "n = normal mode, h = hard mode" << endl;
-	cin >> difficulty;
-
-	// 選取模式
-	cout << "Select mode" << endl;
-	cout << "s = solve mode, t = test mode" << endl;
-	cin >> mode;
+	change_difficulty();
+	change_mode();
+	
   	return;
 }
 
@@ -275,7 +286,7 @@ void init(){
 // 取得單次隨機猜測所需的次數
 int get_random_guess_times(){
 	vector<int> possible_ans_idx;
-	clear_possible_ans_idx(possible_ans_idx);
+	init_possible_ans_idx(possible_ans_idx);
 	int guess_times = 1;
 	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
 	mt19937 gen(seed);
@@ -342,23 +353,22 @@ vector<int> test(int test_times){
 // 解wordle
 void solve(){
 	vector<int> possible_ans_idx;
+	init_possible_ans_idx(possible_ans_idx);
 	while(true){
-		clear_possible_ans_idx(possible_ans_idx);
-		while(true){
-			int best_guess_idx = guess(possible_ans_idx);
-			cout << "best guess: " << all_words.at(best_guess_idx) << endl;
-			string raw_result;
-			cin >> raw_result;
-			if(raw_result == "stop"){
-				return;
-			}
-			int correct_ans_idx = filter_answer(best_guess_idx, raw_result, possible_ans_idx);
-			if(correct_ans_idx > 0){
-				cout << "Correct answer: " << all_words.at(correct_ans_idx) << endl;
-				break;
-			}
+		int best_guess_idx = guess(possible_ans_idx);
+		cout << "best guess: " << all_words.at(best_guess_idx) << endl;
+		string raw_result;
+		cin >> raw_result;
+		if(raw_result == "stop"){
+			return;
+		}
+		int correct_ans_idx = filter_answer(best_guess_idx, raw_result, possible_ans_idx);
+		if(correct_ans_idx > 0){
+			cout << "Correct answer: " << all_words.at(correct_ans_idx) << endl;
+			break;
 		}
 	}
+	return;
 }
 
 
@@ -369,7 +379,9 @@ int main(int argc,char** argv){
 	}
 	init();
 	if(mode == 's'){
-		solve();
+		while(true){
+			solve();
+		}
 	}
 	else if(mode == 't'){
 		while(true){
