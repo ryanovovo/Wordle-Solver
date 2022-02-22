@@ -20,6 +20,7 @@ const int total_threads = max(1, (int)std::thread::hardware_concurrency()); // �
 
 char difficulty; // n = normal difficulty, h = hard difficulty
 char mode; // s = solve mode, t = test mode
+string directory;
 
 vector<string> all_words(total_words); // 所有可以猜的單字
 vector<vector<int>> all_words_diff(total_words, vector<int>(total_words, 0)); // 所有單字互相diff後的值
@@ -201,14 +202,21 @@ void load_line(const string &line, const int &row){
 
 //初始化程式
 void init(){
+	auto t1 = chrono::high_resolution_clock::now();
 	cout << "Initializing..." << endl;
 
 	vector<thread> threads(8);
 
+	string words_path = directory;
+	string all_words_diff_path = directory;
 
+	words_path.append("words.txt");
+	all_words_diff_path.append("all_words_diff.txt");
+
+	
 	// 開啟必要檔案
-  	ifstream words ("/Users/ryanovovo/Documents/GitHub/wordle-solver/words.txt");
-  	ifstream diff  ("/Users/ryanovovo/Documents/GitHub/wordle-solver/all_words_diff.txt");
+  	ifstream words (words_path);
+  	ifstream diff  (all_words_diff_path);
 
 
   	//檢查是否成功開啟檔案
@@ -240,6 +248,9 @@ void init(){
 	}
 	diff.close();
 
+	auto t2 = chrono::high_resolution_clock::now();
+	chrono::duration<double, milli> ms_double = t2 - t1;
+	cout << "Load time: " << ms_double.count() << "ms" << endl;
 	cout << "Finished Initializing" << endl;
 
 	// 選取困難度
@@ -343,7 +354,11 @@ void solve(){
 }
 
 
-int main(){
+int main(int argc,char** argv){
+	directory = argv[0];
+	while(directory.back() != '/'){
+		directory.pop_back();
+	}
 	init();
 	if(mode == 's'){
 		solve();
@@ -356,8 +371,10 @@ int main(){
 			cout << "Input test times" << endl;
 			cin >> test_times;
 
+			auto t1 = chrono::high_resolution_clock::now();
 			vector<int> counter = test(test_times);
 			
+			auto t2 = chrono::high_resolution_clock::now();
 			for(unsigned int i = 0; i < counter.size(); i++){
 				cout << i << " guess correct: " << counter[i] << endl;
 				avg += (double)i * (double)counter[i];
@@ -365,6 +382,9 @@ int main(){
 
 			avg /= (double)test_times;
 			cout << "Average guess: " << avg << endl;
+
+			chrono::duration<double, milli> ms_double = t2 - t1;
+			cout << "Execution time: " << ms_double.count() << "ms" << endl;
 		}	
 	}
 }
