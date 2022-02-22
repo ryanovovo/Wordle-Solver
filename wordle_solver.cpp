@@ -10,6 +10,7 @@
 #include <future>
 #include <thread>
 #include <algorithm>
+#include "progressbar.hpp"
 using namespace std;
 
 
@@ -203,8 +204,10 @@ void load_line(const string &line, const int &row){
 //初始化程式
 void init(){
 	cout << "Total Threads: " << total_threads << endl;
-	auto t1 = chrono::high_resolution_clock::now();
+	auto start_time = chrono::high_resolution_clock::now();
 	cout << "Initializing..." << endl;
+
+	progressbar bar(total_words);
 
 	vector<thread> threads(total_threads);
 
@@ -236,6 +239,7 @@ void init(){
   	
 	// 將所有單字的diff值導入容器中
 	for(int i = 0; getline(diff, line); i++){
+		bar.update();
 		if(i < total_threads){
 			threads[i] = thread(load_line, line, i);
 		}
@@ -247,10 +251,11 @@ void init(){
 	for(int i = 0; i < total_threads; i++){
 		threads[i].join();
 	}
+	cout << endl;
 	diff.close();
 
-	auto t2 = chrono::high_resolution_clock::now();
-	chrono::duration<double, milli> ms_double = t2 - t1;
+	auto end_time = chrono::high_resolution_clock::now();
+	chrono::duration<double, milli> ms_double = end_time - start_time;
 	cout << "Load time: " << ms_double.count() << "ms" << endl;
 	cout << "Finished Initializing" << endl;
 
@@ -293,9 +298,10 @@ int get_random_guess_times(){
 // 測試指定的猜測次數，並回傳統計次數
 vector<int> test(int test_times){
 	vector<int> counter;
-
+	progressbar bar(test_times);
 	vector<future<int>> threads(total_threads);
 	for(int i = 0; i < test_times; i++){
+		bar.update();
 		if(i < total_threads){
 			threads[i] = async(get_random_guess_times);
 		}
@@ -309,6 +315,7 @@ vector<int> test(int test_times){
 		}
 	}
 	
+	cout << endl;
 	if(test_times > total_threads){
 		for(int i = 0; i < total_threads; i++){
 			int guess_times = threads[i%total_threads].get();
@@ -376,10 +383,10 @@ int main(int argc,char** argv){
 				break;
 			}
 
-			auto t1 = chrono::high_resolution_clock::now();
+			auto start_time = chrono::high_resolution_clock::now();
 			vector<int> counter = test(test_times);
 			
-			auto t2 = chrono::high_resolution_clock::now();
+			auto end_time = chrono::high_resolution_clock::now();
 			for(unsigned int i = 0; i < counter.size(); i++){
 				cout << i << " guess correct: " << counter[i] << endl;
 				avg += (double)i * (double)counter[i];
@@ -388,7 +395,7 @@ int main(int argc,char** argv){
 			avg /= (double)test_times;
 			cout << "Average guess: " << avg << endl;
 
-			chrono::duration<double, milli> ms_double = t2 - t1;
+			chrono::duration<double, milli> ms_double = end_time - start_time;
 			cout << "Execution time: " << ms_double.count() << "ms" << endl;
 		}	
 	}
