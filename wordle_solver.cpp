@@ -202,6 +202,7 @@ void load_line(const string &line, const int &row){
 
 //初始化程式
 void init(){
+	auto t1 = chrono::high_resolution_clock::now();
 	cout << "Initializing..." << endl;
 
 	vector<thread> threads(8);
@@ -247,6 +248,9 @@ void init(){
 	}
 	diff.close();
 
+	auto t2 = chrono::high_resolution_clock::now();
+	chrono::duration<double, milli> ms_double = t2 - t1;
+	cout << "Load time: " << ms_double.count() << "ms" << endl;
 	cout << "Finished Initializing" << endl;
 
 	// 選取困難度
@@ -367,8 +371,10 @@ int main(int argc,char** argv){
 			cout << "Input test times" << endl;
 			cin >> test_times;
 
+			auto t1 = chrono::high_resolution_clock::now();
 			vector<int> counter = test(test_times);
 			
+			auto t2 = chrono::high_resolution_clock::now();
 			for(unsigned int i = 0; i < counter.size(); i++){
 				cout << i << " guess correct: " << counter[i] << endl;
 				avg += (double)i * (double)counter[i];
@@ -376,6 +382,9 @@ int main(int argc,char** argv){
 
 			avg /= (double)test_times;
 			cout << "Average guess: " << avg << endl;
+
+			chrono::duration<double, milli> ms_double = t2 - t1;
+			cout << "Execution time: " << ms_double.count() << "ms" << endl;
 		}	
 	}
 }
