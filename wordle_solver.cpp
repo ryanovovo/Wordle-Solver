@@ -202,10 +202,11 @@ void load_line(const string &line, const int &row){
 
 //初始化程式
 void init(){
+	cout << "Total Threads: " << total_threads << endl;
 	auto t1 = chrono::high_resolution_clock::now();
 	cout << "Initializing..." << endl;
 
-	vector<thread> threads(8);
+	vector<thread> threads(total_threads);
 
 	string words_path = directory;
 	string all_words_diff_path = directory;
@@ -281,7 +282,7 @@ int get_random_guess_times(){
 		int raw_result = diff_answer_and_guess(answer, best_guess_idx);
 		int correct_ans_idx = filter_answer(best_guess_idx, raw_result, possible_ans_idx);
 		if(correct_ans_idx > 0 || raw_result == 242){
-			cout << "Answer: " << all_words.at(correct_ans_idx) << " guess " << guess_times << " times" << endl;
+			// cout << "Answer: " << all_words.at(correct_ans_idx) << " guess " << guess_times << " times" << endl;
 			return guess_times;
 		}
 	}
