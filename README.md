@@ -8,8 +8,7 @@
 ### 下載程式碼
 
 #### 由git clone指令下載
-`git clone https://gitlab.com/ryanovovo/wordle-
-solver.git`
+`git clone https://gitlab.com/ryanovovo/wordle-solver.git`
 
 #### 由連結下載
 [Link](https://gitlab.com/ryanovovo/wordle-solver/-/archive/master/wordle-solver-master.zip)
