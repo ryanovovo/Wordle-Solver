@@ -357,7 +357,7 @@ void solve(){
 
 int main(int argc,char** argv){
 	directory = argv[0];
-	while(directory.back() != '/'){
+	while(directory.back() != '/' && directory.back() != '\\'){
 		directory.pop_back();
 	}
 	init();
@@ -371,6 +371,10 @@ int main(int argc,char** argv){
 			
 			cout << "Input test times" << endl;
 			cin >> test_times;
+
+			if(test_times == 0){
+				break;
+			}
 
 			auto t1 = chrono::high_resolution_clock::now();
 			vector<int> counter = test(test_times);
