@@ -26,7 +26,7 @@ public:
 	void change_mode(char);
 
 	Wordle(string);
-	Wordle(string, char, char );
+	Wordle(string, char, char);
 
 private:
 
@@ -85,6 +85,7 @@ inline Wordle::Wordle(string dir){
 }
 
 
+// 初始化環境
 inline Wordle::Wordle(string dir, char Difficulty, char Mode){
 	directory = dir;
 	total_threads = max(1, (int)std::thread::hardware_concurrency());
@@ -98,7 +99,7 @@ inline Wordle::Wordle(string dir, char Difficulty, char Mode){
 }
 
 
-
+// 計算陣列的變異數
 inline double Wordle::variance(const vector<int> &data){
 	int data_size = data.size();
 	double avg = 0.0;
@@ -115,6 +116,7 @@ inline double Wordle::variance(const vector<int> &data){
 }
 
 
+// 將陣列離散化
 inline vector<int> Wordle::discretize(vector<int> &data){
 	int data_size = data.size();
 	vector<int> discretize_data(data_size, 0);
@@ -134,6 +136,7 @@ inline vector<int> Wordle::discretize(vector<int> &data){
 }
 
 
+// 將可能的儲存答案index的陣列初始化
 inline void Wordle::init_possible_ans_idx(vector<int> &possible_ans_idx){
 	possible_ans_idx.clear();
 	for(int i = 0; i < total_words; i++){
@@ -143,11 +146,13 @@ inline void Wordle::init_possible_ans_idx(vector<int> &possible_ans_idx){
 }
 
 
+// 計算正確答案和猜測答案的diff值
 inline int Wordle::diff_answer_and_guess(const int &ans_idx, const int &guess_idx){
 	return all_words_diff[ans_idx][guess_idx];
 }
 
 
+// 將wordle回傳的結果編碼
 inline int Wordle::get_encoded_result(const string &raw_result){
 	int encoded_result = 0;
   	int pow = 1;
@@ -164,6 +169,7 @@ inline int Wordle::get_encoded_result(const string &raw_result){
 }
 
 
+// 篩出可能的答案
 template <typename T>
 inline int Wordle::filter_answer(const int &best_guess_idx, const T &raw_result, vector<int> &possible_ans_idx){
 	// 將結果轉換為編碼後的格式
@@ -201,6 +207,7 @@ inline int Wordle::filter_answer(const int &best_guess_idx, const T &raw_result,
 }
 
 
+// 猜測可能答案
 inline int Wordle::guess(vector<int> &possible_ans_idx){ 
 	// 初始參數
 	double min_variance = 999999999.0;
@@ -248,6 +255,7 @@ inline int Wordle::guess(vector<int> &possible_ans_idx){
 }
 
 
+// 取得單次隨機猜測所需的次數
 inline int Wordle::get_random_guess_times(){
 	vector<int> possible_ans_idx;
 	init_possible_ans_idx(possible_ans_idx);
@@ -270,6 +278,7 @@ inline int Wordle::get_random_guess_times(){
 }
 
 
+// 測試指定的猜測次數，並回傳統計次數
 inline vector<int> Wordle::test(int test_times){
 	vector<int> counter;
 	progressbar bar(test_times);
@@ -313,6 +322,7 @@ inline vector<int> Wordle::test(int test_times){
 }
 
 
+// 輸出測試結果
 inline void Wordle::print_test_result(int test_times){
 	if(test_times == 0){
 		return;
@@ -362,19 +372,20 @@ inline void Wordle::solve(){
 }
 
 
-
+// 更改困難度
 inline void Wordle::change_difficulty(char Difficulty){
 	difficulty = Difficulty;
 	return;
 }
 
-
+// 更改模式
 inline void Wordle::change_mode(char Mode){
 	mode = Mode;
 	return;
 }
 
 
+// 將讀取到的字串寫入至容器中
 inline void Wordle::load_line(const string &line, const int &row){
 	string tmp;
 	int column = 0;
@@ -392,6 +403,7 @@ inline void Wordle::load_line(const string &line, const int &row){
 }
 
 
+// 將必要檔案讀入容器中
 inline void Wordle::load_file(){
 	cout << "Total Threads: " << total_threads << endl;
 
