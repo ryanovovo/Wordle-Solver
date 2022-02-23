@@ -24,7 +24,7 @@ int main(int argc, char **argv){
 	// 開始執行程式
 	while(true){
 		cout << "Select difficulty" << endl;
-		cout << "n = normal, s = hard" << endl;
+		cout << "n = normal, h = hard" << endl;
 		cin >> difficulty;
 
 		cout << "Select mode" << endl;
