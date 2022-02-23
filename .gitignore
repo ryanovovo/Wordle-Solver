@@ -1,4 +1,5 @@
-
+.DS_Store
+wordle_solver
 tmp.cpp
 tmp
 wordle_solver_tmp
@@ -9,5 +10,4 @@ Wordle獲勝策略之研究-自主學習成果.aux
 *.tex
 *.toc
 
-wordle_solver_less_ram
-
+main
