@@ -67,8 +67,12 @@ wordle遊戲的回傳結果請依照下方圖示填入程式中
 猜中後程式會自動執行下一輪新的猜測，若要退出請按`ctrl+c`
 
 
-### Demo影片
+### 使用Demo
 
+#### Solve mode demo
+<img alt="alt_text" width="600px" src="https://i.imgur.com/9BN2UEV.gif" />
 
-[<img alt="alt_text" width="300px" src="https://i.imgur.com/xM09gDZ.png" />](https://www.youtube.com/watch?v=6ePgQ4rbVAo)
+#### Test mode demo
+
+<img alt="alt_text" width="600px" src="https://i.imgur.com/cow7kwG.gif" />
 
