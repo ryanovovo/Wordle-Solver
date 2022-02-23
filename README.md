@@ -8,8 +8,7 @@
 ### 下載程式碼
 
 #### 由git clone指令下載
-`git clone https://gitlab.com/ryanovovo/wordle-
-solver.git`
+`git clone https://gitlab.com/ryanovovo/wordle-solver.git`
 
 #### 由連結下載
 [Link](https://gitlab.com/ryanovovo/wordle-solver/-/archive/master/wordle-solver-master.zip)
@@ -19,13 +18,12 @@ solver.git`
 
 
 ### 編譯程式碼
-#### 使用指令
 ```
-g++ wordle_solver.cpp -std=c++17 -pthread -o wordle_solver
+g++ main.cpp -std=c++17 -pthread -o main
 ```
 
 ### 執行程式
-`./wordle_solver`
+`./main`
 
 
 ## 程式使用說明
@@ -71,5 +69,6 @@ wordle遊戲的回傳結果請依照下方圖示填入程式中
 
 ### Demo影片
 
-[<img alt="Wordle Solver Demo" width="400px" src="https://i.imgur.com/VeRcmb7.png" />](https://www.youtube.com/watch?v=6ePgQ4rbVAo)
+
+[<img alt="alt_text" width="300px" src="https://i.imgur.com/xM09gDZ.png" />](https://www.youtube.com/watch?v=6ePgQ4rbVAo)
 
