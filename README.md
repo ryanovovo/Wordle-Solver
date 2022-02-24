@@ -19,7 +19,7 @@
 
 ### 編譯程式碼
 ```
-g++ main.cpp -std=c++17 -pthread -o main
+g++ main.cpp -O2 -std=c++17 -pthread -o main
 ```
 
 ### 執行程式
