@@ -465,5 +465,4 @@ inline void Wordle::load_file(){
 	return;
 }
 
-
 #endif
