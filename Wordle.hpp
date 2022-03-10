@@ -40,8 +40,8 @@ private:
 	// ----------------------------------------------------------------
 	vector<int> test(int);
 	void init_possible_ans_idx(vector<int> &);
-	int diff_answer_and_guess(const int &, const int &);
-	int get_encoded_result(const string &);
+	int diff(const int &, const int &);
+	int encode(const string &);
 	template <typename T>
 	int filter_answer(const int &, const T &, vector<int> &);
 	int get_random_guess_times();
@@ -147,13 +147,13 @@ inline void Wordle::init_possible_ans_idx(vector<int> &possible_ans_idx){
 
 
 // 計算正確答案和猜測答案的diff值
-inline int Wordle::diff_answer_and_guess(const int &ans_idx, const int &guess_idx){
+inline int Wordle::diff(const int &ans_idx, const int &guess_idx){
 	return all_words_diff[ans_idx][guess_idx];
 }
 
 
 // 將wordle回傳的結果編碼
-inline int Wordle::get_encoded_result(const string &raw_result){
+inline int Wordle::encode(const string &raw_result){
 	int encoded_result = 0;
   	int pow = 1;
   	for(int i = 0; i < 5; i++){
@@ -178,7 +178,7 @@ inline int Wordle::filter_answer(const int &best_guess_idx, const T &raw_result,
 		result = raw_result;
 	}
 	else if constexpr(is_same_v<T, string>){
-		result = get_encoded_result(raw_result);
+		result = encode(raw_result);
 	}
 	else{
 		assert(false);
@@ -188,7 +188,7 @@ inline int Wordle::filter_answer(const int &best_guess_idx, const T &raw_result,
 	// 將結果與可能的答案比對
 	vector<int> new_possible_ans_idx;
 	for(unsigned int i = 0; i < possible_ans_idx.size(); i++){
-		if(diff_answer_and_guess(possible_ans_idx[i], best_guess_idx) == result){
+		if(diff(possible_ans_idx[i], best_guess_idx) == result){
 			new_possible_ans_idx.push_back(possible_ans_idx[i]);
 		}
 	}
@@ -226,7 +226,7 @@ inline int Wordle::guess(vector<int> &possible_ans_idx){
 		for(unsigned int i = 0; i < total_words; i++){
 			vector<int> diff_result;
 			for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
-				diff_result.push_back(diff_answer_and_guess(possible_ans_idx[j], i));
+				diff_result.push_back(diff(possible_ans_idx[j], i));
 			}
 			vector<int> distribution = discretize(diff_result);
 			double var = variance(distribution);
@@ -240,7 +240,7 @@ inline int Wordle::guess(vector<int> &possible_ans_idx){
 		for(unsigned int i = 0; i < possible_ans_idx.size(); i++){
 			vector<int> diff_result;
 			for(unsigned int j = 0; j < possible_ans_idx.size(); j++){
-				diff_result.push_back(diff_answer_and_guess(possible_ans_idx[j], possible_ans_idx[i]));
+				diff_result.push_back(diff(possible_ans_idx[j], possible_ans_idx[i]));
 			}
 			vector<int> distribution = discretize(diff_result);
 			double var = variance(distribution);
@@ -267,7 +267,7 @@ inline int Wordle::get_random_guess_times(){
 	for(int i = 0; i < 2000; i++){
 		guess_times++;
 		int best_guess_idx = guess(possible_ans_idx);
-		int raw_result = diff_answer_and_guess(answer, best_guess_idx);
+		int raw_result = diff(answer, best_guess_idx);
 		int correct_ans_idx = filter_answer(best_guess_idx, raw_result, possible_ans_idx);
 		if(correct_ans_idx > 0 || raw_result == 242){
 			// cout << "Answer: " << all_words.at(correct_ans_idx) << " guess " << guess_times << " times" << endl;
