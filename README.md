@@ -72,9 +72,9 @@ wordle遊戲的回傳結果請依照下方圖示填入程式中
 ### 使用Demo
 
 #### Solve mode demo
-<img alt="alt_text" width="600px" src="https://i.imgur.com/gsAvHpQ.gif" />
+<img alt="alt_text" width="600px" src="https://gitlab.com/ryanovovo/wordle-solver/-/raw/master/demo/wordle%20solve%20demo.gif" />
 
 #### Test mode demo
 
-<img alt="alt_text" width="600px" src="https://i.imgur.com/0KbrEN8.gif" />
+<img alt="alt_text" width="600px" src="https://gitlab.com/ryanovovo/wordle-solver/-/raw/master/demo/wordle%20test%20demo.gif" />
 
