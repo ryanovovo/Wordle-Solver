@@ -330,18 +330,27 @@ inline void Wordle::print_test_result(int test_times){
 
 	cout << "Testing..." << endl;
 	double avg = 0.0;
+	int right_guess = 0;
 
 	auto start_time = chrono::high_resolution_clock::now();
 	vector<int> counter = test(test_times);
 	
 	auto end_time = chrono::high_resolution_clock::now();
+
+	
 	for(unsigned int i = 0; i < counter.size(); i++){
+		if(i < 7){
+			right_guess += counter[i];
+		}
 		cout << i << " guess correct: " << counter[i] << endl;
 		avg += (double)i * (double)counter[i];
 	}
 
 	avg /= (double)test_times;
 	cout << "Average guess: " << avg << endl;
+
+	double win_rate = double(right_guess) * 100 / (double)test_times;
+	cout << "Win rate: " << fixed << setprecision(2) << win_rate << "%" <<endl;
 
 	chrono::duration<double, milli> ms_double = end_time - start_time;
 	cout << "Execution time: " << ms_double.count() << "ms" << endl;
